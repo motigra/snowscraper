@@ -9,7 +9,8 @@
     "json2csv": "^3.7.3",
     "lodash": "^4.17.4",
     "q": "^1.4.1",
-    "request": "^2.79.0"
+    "request": "^2.79.0",
+    "string-similarity": "^1.1.0"
   },
   "devDependencies": {},
   "scripts": {

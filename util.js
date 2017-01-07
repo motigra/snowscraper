@@ -15,7 +15,7 @@ function transformCSV(originalFile, newFile, lineProcessor){
 		.on('done',(error)=>{
 			
 			if(error){
-				dfd.fail(error);
+				dfd.reject(error);
 			}
 			else {
 				var csv = json2csv({ data: buffer });
@@ -28,4 +28,28 @@ function transformCSV(originalFile, newFile, lineProcessor){
 	return dfd.promise;
 }
 
-module.exports = { transformCSV };
+function csvToJson(fileName, lineProcessor){
+	
+	var buffer = [], dfd = q.defer();
+	
+	csv()
+		.fromFile(fileName)
+		.on('json',(jsonObj)=>{
+			buffer.push(lineProcessor ? lineProcessor(jsonObj) : jsonObj);
+		})
+		.on('done',(error)=>{
+			
+			if(error){
+				dfd.reject(error);
+			}
+			else {
+				dfd.resolve(buffer);
+			}
+			
+		});
+	
+	return dfd.promise;
+	
+}
+
+module.exports = { csvToJson, transformCSV };
