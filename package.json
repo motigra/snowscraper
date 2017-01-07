@@ -1,0 +1,20 @@
+{
+  "name": "snowscraper",
+  "version": "0.0.1",
+  "description": "snow history scraping project",
+  "main": "check1.js",
+  "dependencies": {
+    "cheerio": "^0.22.0",
+    "csvtojson": "^1.1.2",
+    "json2csv": "^3.7.3",
+    "lodash": "^4.17.4",
+    "q": "^1.4.1",
+    "request": "^2.79.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Moti Granovsky",
+  "license": "ISC"
+}
