@@ -4,21 +4,86 @@ var request = require('request');
 var cheerio = require('cheerio');
 var json2csv = require('json2csv');
 
+
+
 ///////////
 
 function transformResortName(name = ''){
 
     var ret = name;
-    ret.replace(" - ", "-");
-    ret.replace(" ", "-");
-    ret.replace("/", "");
-    ret.replace(".", "");
-    ret.replace("'", "");
-    ret.replace("ö", "oe");
-    ret.replace("ü", "ue");
-    ret.replace("ß", "ss");
+
+    ret = ret.replace(/(\s[-,–]\s)|(\s)/ig, "-");
+    ret = ret.replace(/\/|\.|\||\(|\)|\'/ig, "");
+    ret = ret.replace(/ö/ig, "oe");
+    ret = ret.replace(/ü/ig, "ue");
+    ret = ret.replace(/ß/ig, "ss");
 
     return ret;
+
+}
+
+function doResort(name = ''){
+
+    //console.info("start resort: %s", name);
+
+    var url = "http://www.skiresort.info/ski-resort/" + transformResortName(name).toLowerCase() + "/";
+
+    //console.log("url: %s" + url);
+
+    return new Promise((resolve, reject) => {
+
+        request(url, function (error, response, html) {
+            
+            if (!error && response.statusCode == 200) {
+
+                var $ = cheerio.load(html);
+
+                var resortData = {
+                    name: name,
+                };
+
+
+                try {
+
+                    $('.lift-count').each((idx, el) => {
+
+                        var type = $(el).attr("title");
+                        var count = $(el).find(".lift-amount").text();
+                        resortData["lift_"+type.replace(/\s/ig, "_")] = count;
+
+                    });
+
+                }
+                catch(err) {
+                    console.error("Error: %s", url);
+                }
+
+                try {
+
+                    var seasonText = $('div.detail-links div.description table.info-table tr:nth-child(1) td:nth-child(2)').text();
+                    var r = /\d{4}-\d{2}-\d{2}/ig;
+                    var m = seasonText.match(r);
+
+                    resortData.season_open = m[0];
+                    resortData.season_close = m[1];
+                }
+                catch(err) {
+                    console.error("Error: %s", url);
+                }
+
+                resolve(resortData);
+
+            }
+            else {
+                console.error("Error!");
+                console.error(url);
+                console.error(response.statusCode);
+                console.error(error);
+                reject(error);
+            }
+        });
+
+    });
 
 }
 
@@ -448,3 +513,34 @@ var resorts = [
     "Schneeerlebniswelt Seestadt Aspern – Vienna (dry slopes)",
     "Bichlalm"
 ];
+
+///////////
+
+var i=0, l=resorts.length,
+ arr = [];
+
+(function loop(i){
+
+    doResort(resorts[i])
+        .then((data) => {
+            arr.push(data);
+            if(i<l) {
+                console.log("done with %d: %s", i, data.name);
+                setTimeout(() => {
+                    loop(i+1);
+                }, 0);
+            }
+            else {
+                console.log("done!");
+
+                var result = json2csv({ data: arr });
+                
+                console.log(result);
+            }
+        }, (err) => {
+            setTimeout(() => {
+                loop(i+1);
+            }, 0);
+        });
+
+})(i);
