@@ -30,25 +30,27 @@ function transformCSV(originalFile, newFile, lineProcessor){
 
 function csvToJson(fileName, lineProcessor){
 	
-	var buffer = [], dfd = q.defer();
+	var buffer = [];
+
+	return new Promise((resolve, rejecT) => {
+
+		csv()
+			.fromFile(fileName)
+			.on('json',(jsonObj)=>{
+				buffer.push(lineProcessor ? lineProcessor(jsonObj) : jsonObj);
+			})
+			.on('done',(error)=>{
+				
+				if(error){
+					reject(error);
+				}
+				else {
+					resolve(buffer);
+				}
+				
+			});
 	
-	csv()
-		.fromFile(fileName)
-		.on('json',(jsonObj)=>{
-			buffer.push(lineProcessor ? lineProcessor(jsonObj) : jsonObj);
-		})
-		.on('done',(error)=>{
-			
-			if(error){
-				dfd.reject(error);
-			}
-			else {
-				dfd.resolve(buffer);
-			}
-			
-		});
-	
-	return dfd.promise;
+	});
 	
 }
 

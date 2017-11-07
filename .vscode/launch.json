@@ -8,7 +8,7 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceFolder}\\onthesnow-history.js"
+            "program": "${workspaceFolder}\\match.js"
         }
     ]
 }
